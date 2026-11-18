@@ -1,0 +1,1447 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="cream">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>StudySpace - Personal Student Platform</title>
+  
+  <!-- Google Fonts: Plus Jakarta Sans, Quicksand, Playfair Display -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;1,500&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            cream: {
+              50: '#FDFBF7',
+              100: '#FBF9F5',
+              200: '#F5EFEB',
+              300: '#EFE8DE',
+              400: '#E5DCCD'
+            },
+            lavender: {
+              50: '#F6F3FB',
+              100: '#EBE5F8',
+              200: '#D8CCF2',
+              300: '#B8A7E0',
+              500: '#9D8BC9',
+              600: '#8874B8',
+              700: '#6F5B9B',
+              800: '#544379',
+              900: '#3D2F5A'
+            },
+            sage: {
+              50: '#F3F7F1',
+              100: '#E6EDE2',
+              200: '#CEE0C8',
+              300: '#A3B899',
+              500: '#8FA882',
+              600: '#759067',
+              700: '#4F6744'
+            },
+            butter: {
+              50: '#FEFDF5',
+              100: '#FEF9C3',
+              200: '#FEF08A',
+              300: '#FEE388',
+              500: '#F59E0B'
+            },
+            softpink: {
+              50: '#FDF4F6',
+              100: '#FCEEF0',
+              200: '#F7CAD0',
+              300: '#F4ACB7',
+              500: '#E28695',
+              700: '#D97384'
+            }
+          }
+        }
+      }
+    };
+  </script>
+
+  <!-- Canvas Confetti & Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="bg-cream-100 text-[#363A45] antialiased min-h-screen flex flex-col md:flex-row selection:bg-lavender-200 selection:text-lavender-900">
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container"></div>
+
+  <!-- Interactive Tutorial Walkthrough Overlay -->
+  <div id="tutorial-overlay" class="hidden"></div>
+
+  <!-- Fullscreen Focus Mode Backdrop -->
+  <div id="focus-mode-backdrop" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-md z-[9990]"></div>
+
+  <!-- ========================================================
+       DESKTOP SIDEBAR NAVIGATION (md and up)
+  ======================================================== -->
+  <aside id="desktop-sidebar" class="hidden md:flex flex-col w-64 lg:w-72 bg-white border-r border-cream-200 h-screen sticky top-0 shrink-0 z-30 select-none shadow-soft">
+    <!-- Brand -->
+    <div class="p-6 pb-4 flex items-center justify-between border-b border-cream-200/70">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-lavender-500 via-lavender-300 to-sage-300 flex items-center justify-center shadow-xs">
+          <span class="text-xl">✨</span>
+        </div>
+        <div>
+          <h1 class="font-heading text-xl font-bold tracking-tight text-main">StudySpace</h1>
+          <p class="text-[10px] text-muted font-medium tracking-wide uppercase">Ruang Belajar Pribadi</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- User Profile Quick Card in Sidebar -->
+    <div id="user-profile-widget" class="px-4 py-3.5 m-3 rounded-2xl bg-cream-50 border border-cream-200/80 flex items-center gap-3">
+      <div id="sidebar-avatar-circle" class="w-11 h-11 rounded-full overflow-hidden shrink-0 border-2 border-lavender-300 shadow-xs cursor-pointer hover:scale-105 transition-transform" onclick="window.app.navigate('avatar')"></div>
+      <div class="min-w-0 flex-1">
+        <h3 id="sidebar-user-name" class="text-xs font-bold text-main truncate">Sarah Amalia</h3>
+        <p id="sidebar-user-level" class="text-[10px] text-lavender-700 font-semibold truncate">Lvl 1 • Beginner</p>
+      </div>
+      <button onclick="window.app.navigate('avatar')" class="text-xs p-1 text-slate-400 hover:text-lavender-700" title="Kustomisasi Avatar">
+        🎨
+      </button>
+    </div>
+
+    <!-- Navigation Hubs -->
+    <nav class="flex-1 px-3 py-2 space-y-1 overflow-y-auto no-scrollbar">
+      <button onclick="window.app.navigate('dashboard')" data-view="dashboard" class="nav-link-btn w-full flex items-center gap-3.5 px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-all text-left">
+        <span class="text-base">🏠</span>
+        <span>Dashboard</span>
+      </button>
+
+      <button id="sidebar-nav-tasks" onclick="window.app.navigate('tasks')" data-view="tasks" class="nav-link-btn w-full flex items-center gap-3.5 px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-all text-left">
+        <span class="text-base">📝</span>
+        <span>My Tasks</span>
+      </button>
+
+      <button onclick="window.app.navigate('schedule')" data-view="schedule" class="nav-link-btn w-full flex items-center gap-3.5 px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-all text-left">
+        <span class="text-base">📅</span>
+        <span>My Schedule</span>
+      </button>
+
+      <button onclick="window.app.navigate('notes')" data-view="notes" class="nav-link-btn w-full flex items-center gap-3.5 px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-all text-left">
+        <span class="text-base">📓</span>
+        <span>My Notes</span>
+      </button>
+
+      <button onclick="window.app.navigate('goals')" data-view="goals" class="nav-link-btn w-full flex items-center gap-3.5 px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-all text-left">
+        <span class="text-base">🎯</span>
+        <span>My Goals</span>
+      </button>
+
+      <button id="sidebar-nav-timer" onclick="window.app.navigate('timer')" data-view="timer" class="nav-link-btn w-full flex items-center gap-3.5 px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-all text-left">
+        <span class="text-base">⏳</span>
+        <span>Focus Timer</span>
+      </button>
+
+      <button id="sidebar-nav-music" onclick="window.app.navigate('music')" data-view="music" class="nav-link-btn w-full flex items-center gap-3.5 px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-all text-left">
+        <span class="text-base">🎧</span>
+        <span>Study Music</span>
+      </button>
+
+      <button id="sidebar-nav-brain" onclick="window.app.navigate('brain')" data-view="brain" class="nav-link-btn w-full flex items-center gap-3.5 px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-all text-left">
+        <span class="text-base">🧩</span>
+        <span>Brain Corner</span>
+      </button>
+
+      <button onclick="window.app.navigate('tracker')" data-view="tracker" class="nav-link-btn w-full flex items-center gap-3.5 px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-all text-left">
+        <span class="text-base">📊</span>
+        <span>Study Tracker</span>
+      </button>
+
+      <button onclick="window.app.navigate('quests')" data-view="quests" class="nav-link-btn w-full flex items-center gap-3.5 px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-all text-left">
+        <span class="text-base">⚔️</span>
+        <span>My Quests</span>
+      </button>
+
+      <button onclick="window.app.navigate('achievements')" data-view="achievements" class="nav-link-btn w-full flex items-center gap-3.5 px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-all text-left">
+        <span class="text-base">🏆</span>
+        <span>Achievements</span>
+      </button>
+
+      <button onclick="window.app.navigate('avatar')" data-view="avatar" class="nav-link-btn w-full flex items-center gap-3.5 px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-all text-left">
+        <span class="text-base">🌸</span>
+        <span>My Avatar</span>
+      </button>
+
+      <button onclick="window.app.navigate('settings')" data-view="settings" class="nav-link-btn w-full flex items-center gap-3.5 px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-all text-left">
+        <span class="text-base">⚙️</span>
+        <span>Settings</span>
+      </button>
+    </nav>
+
+    <!-- Logout -->
+    <div class="p-3 border-t border-cream-200/70">
+      <button onclick="window.authController.logout()" class="w-full flex items-center gap-3 px-4 py-2 rounded-xl text-xs font-semibold text-slate-500 hover:text-pink-700 hover:bg-pink-50 transition-colors">
+        <span>🚪</span>
+        <span>Keluar (Logout)</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- ========================================================
+       MAIN APP SHELL
+  ======================================================== -->
+  <div class="flex-1 flex flex-col min-w-0 pb-20 md:pb-8">
+
+    <!-- Top Header -->
+    <header class="sticky top-0 z-20 bg-white/90 backdrop-blur-md border-b border-cream-200 px-4 sm:px-8 py-3.5 flex items-center justify-between shadow-2xs">
+      <!-- Left: Mobile Menu Toggle & Title -->
+      <div class="flex items-center gap-3">
+        <button onclick="window.app.toggleMobileDrawer()" class="md:hidden p-2 rounded-xl text-slate-600 hover:bg-slate-100 transition-colors">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+          </svg>
+        </button>
+        <span class="md:hidden font-heading text-lg font-bold text-main">StudySpace</span>
+      </div>
+
+      <!-- Right: Streak pill, SP badge, and Avatar -->
+      <div class="flex items-center gap-3">
+        <!-- Daily Streak Pill -->
+        <div id="header-streak-pill" class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-50 border border-amber-200 text-amber-800 text-xs font-bold shadow-2xs cursor-pointer hover:scale-105 transition-transform" onclick="window.app.navigate('tracker')" title="Study Streak">
+          1 🔥
+        </div>
+
+        <!-- Study Points Pill -->
+        <div id="header-sp-pill" class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-lavender-100 border border-lavender-200 text-lavender-800 text-xs font-bold shadow-2xs cursor-pointer hover:scale-105 transition-transform" onclick="window.app.navigate('tracker')" title="Study Points">
+          0 SP
+        </div>
+
+        <!-- User Avatar Circle -->
+        <div id="header-avatar-circle" class="w-9 h-9 rounded-full overflow-hidden border-2 border-lavender-300 shadow-2xs cursor-pointer hover:scale-105 transition-transform" onclick="window.app.navigate('avatar')" title="Buka Profil & Avatar">
+        </div>
+      </div>
+    </header>
+
+    <!-- MAIN VIEW CONTAINER -->
+    <main class="flex-1 p-4 sm:p-6 lg:p-8 max-w-6xl mx-auto w-full">
+
+      <!-- ================= 1. VIEW: DASHBOARD (REDESIGNED: CLEAN, AIRY, COZY) ================= -->
+      <section id="view-dashboard" class="view-container space-y-6 animate-in fade-in duration-300">
+        
+        <!-- Calm Hero Card -->
+        <div id="dashboard-greeting-card" class="soft-card p-6 sm:p-8 rounded-3xl bg-white border border-cream-200 flex flex-col md:flex-row items-center justify-between gap-6 shadow-sm">
+          <div class="flex-1 text-center md:text-left">
+            <span id="dash-greeting-text" class="text-xs font-bold uppercase tracking-wider text-lavender-700 bg-lavender-100 px-3 py-1 rounded-full mb-2 inline-block">
+              Selamat Datang ✨
+            </span>
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-main mb-1">
+              Halo, <span id="dash-greeting-name" class="text-lavender-700">Sarah</span>!
+            </h2>
+            <p id="dash-greeting-desc" class="text-xs sm:text-sm text-muted leading-relaxed mb-4 max-w-lg">
+              Semoga harimu menyenangkan dan belajarmu penuh inspirasi.
+            </p>
+
+            <!-- Minimalist Stats Pill Row -->
+            <div class="flex flex-wrap items-center justify-center md:justify-start gap-2.5 mb-3">
+              <span id="dash-stat-streak" class="px-3 py-1.5 rounded-xl bg-amber-50 border border-amber-200/70 text-amber-800 text-xs font-bold shadow-2xs">
+                1 Hari 🔥
+              </span>
+              <span id="dash-stat-sp" class="px-3 py-1.5 rounded-xl bg-lavender-50 border border-lavender-200/70 text-lavender-800 text-xs font-bold shadow-2xs">
+                0 SP ✨
+              </span>
+              <span id="dash-stat-level" class="px-3 py-1.5 rounded-xl bg-sage-50 border border-sage-200/70 text-sage-800 text-xs font-bold shadow-2xs">
+                Level 1 • Beginner 🌱
+              </span>
+            </div>
+
+            <!-- Mini Progress bar -->
+            <div class="max-w-md">
+              <div class="w-full h-1.5 rounded-full bg-slate-100 overflow-hidden mb-1">
+                <div id="dash-sp-bar" class="h-full rounded-full bg-lavender-500 progress-fill" style="width: 15%"></div>
+              </div>
+              <p id="dash-sp-needed" class="text-[10px] text-muted text-right">100 SP lagi menuju Level 2</p>
+            </div>
+          </div>
+
+          <!-- Avatar Frame -->
+          <div class="shrink-0 flex flex-col items-center">
+            <div id="dash-avatar-container" class="w-24 h-24 sm:w-28 sm:h-28 rounded-3xl bg-cream-50 p-1 border-2 border-lavender-200 shadow-xs flex items-center justify-center cursor-pointer hover:scale-105 transition-transform" onclick="window.app.navigate('avatar')"></div>
+            <button onclick="window.app.navigate('avatar')" class="mt-2 text-xs font-semibold text-lavender-700 hover:underline">
+              Ganti Gaya Avatar 🌸
+            </button>
+          </div>
+        </div>
+
+        <!-- 2 Balanced Columns (Airy & Peaceful) -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+
+          <!-- Left Column (7 cols): Today's Tasks & Schedule -->
+          <div class="lg:col-span-7 space-y-6">
+            
+            <!-- Today's Tasks Section -->
+            <div class="soft-card p-6 rounded-3xl bg-white border border-cream-200">
+              <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center gap-2">
+                  <span class="text-xl">📝</span>
+                  <h3 class="font-heading text-base font-bold text-main">Rencana Belajar Hari Ini</h3>
+                </div>
+                <div class="flex items-center gap-2">
+                  <button onclick="window.tasksController.openAddModal()" class="text-xs font-bold text-lavender-700 hover:bg-lavender-50 px-2.5 py-1 rounded-lg transition-colors">
+                    + Tambah Tugas
+                  </button>
+                  <button onclick="window.app.navigate('tasks')" class="text-xs font-semibold text-muted hover:text-main">
+                    Semua →
+                  </button>
+                </div>
+              </div>
+
+              <!-- Task List Container (Shows empty state or task rows) -->
+              <div id="dash-task-list" class="space-y-2.5"></div>
+            </div>
+
+            <!-- Upcoming Schedule Section -->
+            <div class="soft-card p-6 rounded-3xl bg-white border border-cream-200">
+              <div class="flex items-center justify-between mb-3">
+                <div class="flex items-center gap-2">
+                  <span class="text-xl">📅</span>
+                  <h3 class="font-heading text-base font-bold text-main">Jadwal Belajar Terdekat</h3>
+                </div>
+                <button onclick="window.app.navigate('schedule')" class="text-xs font-semibold text-lavender-700 hover:underline">
+                  Kalender →
+                </button>
+              </div>
+
+              <div id="dash-schedule-list" class="space-y-2"></div>
+            </div>
+
+          </div>
+
+          <!-- Right Column (5 cols): Focus & Music + Quests + Quote -->
+          <div class="lg:col-span-5 space-y-6">
+
+            <!-- Focus & Music Quick Card -->
+            <div id="dashboard-quick-actions" class="soft-card p-5 rounded-3xl bg-white border border-cream-200 space-y-4">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-main uppercase tracking-wider">Ruang Fokus Belajar</span>
+                <span class="text-xs text-muted">25 Menit Pomodoro</span>
+              </div>
+
+              <!-- Quick Focus Timer Button -->
+              <button onclick="window.app.navigate('timer')" class="w-full p-4 rounded-2xl bg-gradient-to-r from-lavender-100 to-pink-50 border border-lavender-200/80 hover:border-lavender-300 flex items-center justify-between group transition-all text-left">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-xl bg-white shadow-2xs flex items-center justify-center text-xl group-hover:scale-110 transition-transform">
+                    ⏳
+                  </div>
+                  <div>
+                    <h4 class="text-sm font-bold text-main">Mulai Focus Timer</h4>
+                    <p class="text-xs text-muted">3 Tema: Lilin, Es, Jam</p>
+                  </div>
+                </div>
+                <span class="text-xs font-bold text-lavender-700">Mulai →</span>
+              </button>
+
+              <!-- Instrumental Music Mini Player Widget -->
+              <div class="p-3.5 rounded-2xl bg-cream-50 border border-cream-200 flex items-center justify-between gap-3">
+                <div class="flex items-center gap-3 min-w-0">
+                  <div class="w-9 h-9 rounded-xl bg-white border border-cream-200 flex items-center justify-center text-base shrink-0 shadow-2xs">
+                    🎧
+                  </div>
+                  <div class="min-w-0">
+                    <p id="dash-music-track-title" class="text-xs font-bold text-main truncate">Morning Piano Serenade</p>
+                    <p class="text-[10px] text-muted">Musik Instrumental Santai</p>
+                  </div>
+                </div>
+                <div class="flex items-center gap-1.5 shrink-0">
+                  <button id="dash-music-play-btn" onclick="window.musicController.togglePlay()" class="w-8 h-8 rounded-full bg-lavender-600 hover:bg-lavender-700 text-white flex items-center justify-center text-xs font-bold shadow-xs">
+                    ▶
+                  </button>
+                  <button onclick="window.app.navigate('music')" class="p-1.5 text-xs text-slate-400 hover:text-lavender-700" title="Buka Music Player">
+                    ↗
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Daily Quests Card -->
+            <div class="soft-card p-5 rounded-3xl bg-white border border-cream-200">
+              <div class="flex items-center justify-between mb-3">
+                <h4 class="font-heading text-sm font-bold text-main flex items-center gap-2">
+                  <span>⚔️</span> Misi Harian (Daily Quests)
+                </h4>
+                <button onclick="window.app.navigate('quests')" class="text-xs text-lavender-700 font-semibold hover:underline">
+                  Semua →
+                </button>
+              </div>
+              <div id="dash-quests-list" class="space-y-2"></div>
+            </div>
+
+            <!-- Single Peaceful Quote Card -->
+            <div class="p-5 rounded-3xl bg-gradient-to-br from-lavender-50 to-cream-50 border border-lavender-100 shadow-2xs cursor-pointer hover:shadow-xs transition-all" onclick="window.dashboardController.nextQuote()">
+              <p id="dash-quote-text" class="font-serif-quote italic text-xs sm:text-sm text-slate-800 leading-relaxed mb-2">
+                "Langkah kecil setiap hari akan membawamu ke tujuan besar."
+              </p>
+              <p id="dash-quote-author" class="text-[11px] font-semibold text-lavender-700 text-right">
+                — StudySpace Reminder (Klik untuk ganti)
+              </p>
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+      <!-- ================= 2. VIEW: MY TASKS ================= -->
+      <section id="view-tasks" class="view-container hidden space-y-6 animate-in fade-in duration-300">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div>
+            <h2 class="font-heading text-2xl font-bold text-main">My Tasks 📝</h2>
+            <p class="text-xs sm:text-sm text-muted">Kelola tugas sekolah, tentukan prioritas, dan kumpulkan +20 Study Points.</p>
+          </div>
+          <button onclick="window.tasksController.openAddModal()" class="btn-primary text-sm shadow-md">
+            + Tambah Tugas Baru
+          </button>
+        </div>
+
+        <!-- Filter & Search Toolbar -->
+        <div class="p-4 rounded-2xl bg-white border border-cream-200 shadow-2xs flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+          <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
+            <button onclick="window.tasksController.setFilter('all')" data-filter="all" class="task-filter-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-lavender-500 text-white transition-all">
+              Semua
+            </button>
+            <button onclick="window.tasksController.setFilter('todo')" data-filter="todo" class="task-filter-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-white text-slate-600 hover:bg-slate-100 transition-all">
+              To Do
+            </button>
+            <button onclick="window.tasksController.setFilter('inprogress')" data-filter="inprogress" class="task-filter-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-white text-slate-600 hover:bg-slate-100 transition-all">
+              Sedang Dikerjakan
+            </button>
+            <button onclick="window.tasksController.setFilter('done')" data-filter="done" class="task-filter-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-white text-slate-600 hover:bg-slate-100 transition-all">
+              Selesai (Done)
+            </button>
+          </div>
+
+          <div class="relative w-full md:w-64">
+            <input 
+              type="text" 
+              placeholder="Cari tugas..." 
+              oninput="window.tasksController.setSearch(this.value)"
+              class="w-full pl-9 pr-3 py-2 rounded-xl text-xs bg-slate-50 border border-cream-200 focus:outline-none focus:ring-2 focus:ring-lavender-400">
+            <span class="absolute left-3 top-2.5 text-xs text-slate-400">🔍</span>
+          </div>
+        </div>
+
+        <div id="tasks-list-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+      </section>
+
+      <!-- ================= 3. VIEW: MY SCHEDULE ================= -->
+      <section id="view-schedule" class="view-container hidden space-y-6 animate-in fade-in duration-300">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div>
+            <h2 class="font-heading text-2xl font-bold text-main">My Schedule 📅</h2>
+            <p class="text-xs sm:text-sm text-muted">Jadwal kegiatan belajar harian dan mingguan yang teratur dan rapi.</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="window.scheduleController.setView('weekly')" data-mode="weekly" class="sch-view-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-sage-500 text-white shadow-2xs">
+              Mingguan
+            </button>
+            <button onclick="window.scheduleController.setView('daily')" data-mode="daily" class="sch-view-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-white text-slate-600 hover:bg-slate-100">
+              Harian
+            </button>
+            <button onclick="window.scheduleController.openAddModal()" class="btn-sage text-sm ml-2">
+              + Tambah Agenda
+            </button>
+          </div>
+        </div>
+
+        <div id="schedule-list-container"></div>
+      </section>
+
+      <!-- ================= 4. VIEW: MY NOTES ================= -->
+      <section id="view-notes" class="view-container hidden space-y-6 animate-in fade-in duration-300">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div>
+            <h2 class="font-heading text-2xl font-bold text-main">My Notes 📓</h2>
+            <p class="text-xs sm:text-sm text-muted">Catatan pribadi, rumus penting, dan rangkuman materi dengan auto-save otomatis.</p>
+          </div>
+          <button onclick="window.notesController.createNewNote()" class="btn-primary text-sm shadow-md">
+            + Tulis Catatan Baru
+          </button>
+        </div>
+
+        <div class="relative max-w-md">
+          <input 
+            type="text" 
+            placeholder="Cari dalam catatan..." 
+            oninput="window.notesController.setSearch(this.value)"
+            class="w-full pl-9 pr-3 py-2 rounded-xl text-xs bg-white border border-cream-200 focus:outline-none focus:ring-2 focus:ring-lavender-400 shadow-2xs">
+          <span class="absolute left-3 top-2.5 text-xs text-slate-400">🔍</span>
+        </div>
+
+        <div id="notes-grid-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+      </section>
+
+      <!-- ================= 5. VIEW: MY GOALS ================= -->
+      <section id="view-goals" class="view-container hidden space-y-6 animate-in fade-in duration-300">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div>
+            <h2 class="font-heading text-2xl font-bold text-main">My Goals 🎯</h2>
+            <p class="text-xs sm:text-sm text-muted">Tetapkan target belajar harian dan mingguan untuk menjaga konsistensi.</p>
+          </div>
+          <button onclick="window.goalsController.openAddModal('daily')" class="btn-primary text-sm shadow-md">
+            + Tambah Target Baru
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div class="space-y-4">
+            <div class="flex items-center justify-between pb-2 border-b border-cream-200">
+              <h3 class="font-heading text-base font-bold text-main flex items-center gap-2">
+                <span>🌅</span> Target Harian (+30 SP)
+              </h3>
+            </div>
+            <div id="goals-daily-list" class="space-y-3"></div>
+          </div>
+
+          <div class="space-y-4">
+            <div class="flex items-center justify-between pb-2 border-b border-cream-200">
+              <h3 class="font-heading text-base font-bold text-main flex items-center gap-2">
+                <span>📆</span> Target Mingguan (+50 SP)
+              </h3>
+            </div>
+            <div id="goals-weekly-list" class="space-y-3"></div>
+          </div>
+        </div>
+
+        <div class="pt-6">
+          <h3 class="font-heading text-base font-bold text-main mb-3 flex items-center gap-2">
+            <span>🏅</span> Riwayat Target yang Selesai
+          </h3>
+          <div id="goals-history-list" class="space-y-2"></div>
+        </div>
+      </section>
+
+      <!-- ================= 6. VIEW: FOCUS TIMER (WITH CUSTOM TIME CHOOSER) ================= -->
+      <section id="view-timer" class="view-container hidden space-y-6 animate-in fade-in duration-300">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div>
+            <h2 class="font-heading text-2xl font-bold text-main">Focus Timer ⏳</h2>
+            <p class="text-xs sm:text-sm text-muted">Pilih durasi cepat atau tentukan sendiri waktu belajarmu dengan visual tema yang menenangkan.</p>
+          </div>
+          <button onclick="window.timerController.toggleFocusMode()" class="btn-secondary text-xs sm:text-sm shadow-xs flex items-center gap-2">
+            <span>⛶</span> Mode Fokus (Fullscreen)
+          </button>
+        </div>
+
+        <!-- Timer Workspace Card -->
+        <div class="soft-card p-6 sm:p-10 rounded-3xl bg-white border border-cream-200 flex flex-col items-center justify-center relative overflow-hidden">
+
+          <!-- Theme Selectors -->
+          <div class="flex items-center p-1.5 rounded-2xl bg-cream-100 border border-cream-200 mb-6 select-none">
+            <button onclick="window.timerController.setTheme('candle')" data-theme="candle" class="timer-theme-tab px-4 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5">
+              <span>🕯️</span> Lilin (Candle)
+            </button>
+            <button onclick="window.timerController.setTheme('ice')" data-theme="ice" class="timer-theme-tab px-4 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5">
+              <span>🧊</span> Es (Ice)
+            </button>
+            <button onclick="window.timerController.setTheme('clock')" data-theme="clock" class="timer-theme-tab px-4 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5">
+              <span>⏰</span> Jam (Clock)
+            </button>
+          </div>
+
+          <!-- Dynamic Theme Visual Animation -->
+          <div id="timer-theme-visual" class="mb-4 flex items-center justify-center"></div>
+
+          <!-- Digital Time Display -->
+          <div id="timer-time-display" class="font-heading text-6xl sm:text-7xl font-extrabold tracking-tight text-main mb-6 select-none focus-clock-text">
+            25:00
+          </div>
+
+          <!-- Quick Presets -->
+          <div class="flex items-center gap-2 mb-4 flex-wrap justify-center select-none">
+            <button onclick="window.timerController.setDuration(15)" data-min="15" class="timer-preset-btn px-4 py-2 rounded-xl text-xs font-bold border border-cream-200 transition-all">
+              15 Menit
+            </button>
+            <button onclick="window.timerController.setDuration(25)" data-min="25" class="timer-preset-btn px-4 py-2 rounded-xl text-xs font-bold border border-cream-200 transition-all">
+              25 Menit (Standar)
+            </button>
+            <button onclick="window.timerController.setDuration(45)" data-min="45" class="timer-preset-btn px-4 py-2 rounded-xl text-xs font-bold border border-cream-200 transition-all">
+              45 Menit
+            </button>
+            <button onclick="window.timerController.setDuration(60)" data-min="60" class="timer-preset-btn px-4 py-2 rounded-xl text-xs font-bold border border-cream-200 transition-all">
+              60 Menit
+            </button>
+          </div>
+
+          <!-- Custom Time Input (Pilih waktu semau kita) -->
+          <div class="flex items-center gap-2 p-2.5 rounded-2xl bg-cream-50 border border-cream-200/90 mb-8 max-w-sm w-full justify-center">
+            <label class="text-xs font-bold text-main whitespace-nowrap">Pilih Durasi Sendiri:</label>
+            <input 
+              id="timer-custom-minutes" 
+              type="number" 
+              min="1" 
+              max="300" 
+              value="30" 
+              placeholder="30"
+              class="w-16 px-2.5 py-1.5 rounded-xl text-center font-bold text-xs bg-white border border-cream-300 focus:outline-none focus:ring-2 focus:ring-lavender-400">
+            <span class="text-xs text-muted font-medium">menit</span>
+            <button onclick="window.timerController.applyCustomDuration()" class="btn-primary text-xs py-1.5 px-3 shadow-2xs">
+              Terapkan
+            </button>
+          </div>
+
+          <!-- Action Controls -->
+          <div class="flex items-center gap-4">
+            <button id="timer-btn-start" onclick="window.timerController.start()" class="btn-primary text-base px-8 py-3.5 shadow-lg hover:scale-105 active:scale-95 transition-all">
+              ▶ Mulai Fokus
+            </button>
+            <button id="timer-btn-pause" onclick="window.timerController.pause()" class="hidden px-8 py-3.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-base shadow-lg transition-all">
+              ⏸ Jeda (Pause)
+            </button>
+            <button onclick="window.timerController.reset()" class="btn-secondary text-sm px-5 py-3.5">
+              ↺ Reset
+            </button>
+          </div>
+        </div>
+
+        <!-- Recent Sessions -->
+        <div class="soft-card p-5 rounded-2xl bg-white border border-cream-200">
+          <h3 class="font-heading text-sm font-bold text-main mb-3">Sesi Belajar Terakhir</h3>
+          <div id="timer-history-list" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3"></div>
+        </div>
+      </section>
+
+      <!-- ================= 7. VIEW: STUDY MUSIC (PURE INSTRUMENTAL & AMBIENCE) ================= -->
+      <section id="view-music" class="view-container hidden space-y-6 animate-in fade-in duration-300">
+        <div>
+          <h2 class="font-heading text-2xl font-bold text-main">Study Music Instrumental 🎧</h2>
+          <p class="text-xs sm:text-sm text-muted">Lagu-lagu instrumental lembut bebas gangguan dan pencampur suara alam untuk menenangkan pikiran.</p>
+        </div>
+
+        <!-- Instrumental Player Card -->
+        <div class="soft-card p-6 sm:p-8 rounded-3xl bg-white border border-cream-200 shadow-soft">
+          <div class="flex flex-col md:flex-row items-center gap-6">
+            <!-- Animated Visualizer Disc -->
+            <div id="music-visualizer-box" class="w-28 h-28 sm:w-36 sm:h-36 rounded-full bg-gradient-to-tr from-lavender-500 via-pink-300 to-amber-200 p-1 flex items-center justify-center shadow-md shrink-0 opacity-40 transition-opacity duration-300">
+              <div class="w-full h-full rounded-full bg-white flex items-center justify-center gap-1.5 shadow-inner">
+                <span class="w-1.5 bg-lavender-500 rounded-full vis-bar-1"></span>
+                <span class="w-1.5 bg-lavender-600 rounded-full vis-bar-2"></span>
+                <span class="w-1.5 bg-pink-500 rounded-full vis-bar-3"></span>
+                <span class="w-1.5 bg-sage-500 rounded-full vis-bar-4"></span>
+                <span class="w-1.5 bg-amber-500 rounded-full vis-bar-5"></span>
+              </div>
+            </div>
+
+            <!-- Track Info & Controls -->
+            <div class="flex-1 w-full text-center md:text-left">
+              <div class="flex items-center justify-center md:justify-start gap-2 mb-1.5">
+                <span id="music-current-genre" class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-lavender-100 text-lavender-800">
+                  Soft Piano
+                </span>
+                <span class="text-xs text-muted font-medium">100% Instrumental</span>
+              </div>
+              <h3 id="music-current-title" class="text-xl sm:text-2xl font-black text-main mb-1">Morning Piano Serenade</h3>
+              <p id="music-current-artist" class="text-xs text-muted mb-5">StudySpace Instrumental</p>
+
+              <!-- Controls -->
+              <div class="flex flex-wrap items-center justify-center md:justify-start gap-3">
+                <button onclick="window.musicController.prevTrack()" class="w-10 h-10 rounded-2xl bg-cream-100 hover:bg-cream-200 text-slate-700 flex items-center justify-center text-sm font-bold shadow-2xs transition-transform active:scale-95" title="Lagu Sebelumnya">
+                  ⏮
+                </button>
+                <button id="music-btn-play" onclick="window.musicController.togglePlay()" class="w-12 h-12 rounded-2xl bg-lavender-600 hover:bg-lavender-700 text-white flex items-center justify-center text-lg font-bold shadow-md hover:scale-105 active:scale-95 transition-all" title="Putar / Jeda">
+                  ▶
+                </button>
+                <button onclick="window.musicController.nextTrack()" class="w-10 h-10 rounded-2xl bg-cream-100 hover:bg-cream-200 text-slate-700 flex items-center justify-center text-sm font-bold shadow-2xs transition-transform active:scale-95" title="Lagu Berikutnya">
+                  ⏭
+                </button>
+
+                <!-- Volume Slider -->
+                <div class="flex items-center gap-2 ml-2 bg-cream-50 px-3 py-2 rounded-2xl border border-cream-200">
+                  <span class="text-xs">🔈</span>
+                  <input 
+                    type="range" 
+                    min="0" 
+                    max="1" 
+                    step="0.05" 
+                    value="0.6" 
+                    oninput="window.musicController.setVolume(this.value)"
+                    class="w-24 h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-lavender-600">
+                  <span class="text-xs">🔊</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Ambient Noise Mixer (Procedural Web Audio) -->
+        <div>
+          <h3 class="font-heading text-base font-bold text-main mb-3 flex items-center gap-2">
+            <span>🌧️</span> Study Ambience Mixer (Campur Suara Sesuai Seleramu)
+          </h3>
+          <div id="music-ambience-mixer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3"></div>
+        </div>
+
+        <!-- Instrumental Track List -->
+        <div>
+          <h3 class="font-heading text-base font-bold text-main mb-3">Daftar Lagu Instrumental</h3>
+          <div id="music-track-list" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
+        </div>
+      </section>
+
+      <!-- ================= 8. VIEW: BRAIN CORNER ================= -->
+      <section id="view-brain" class="view-container hidden space-y-6 animate-in fade-in duration-300">
+        <div>
+          <h2 class="font-heading text-2xl font-bold text-main">Brain Corner 🧩</h2>
+          <p class="text-xs sm:text-sm text-muted">Mini games santai pengasah logika dan daya ingat untuk menyegarkan pikiran di waktu istirahat.</p>
+        </div>
+
+        <div id="brain-stats-summary"></div>
+
+        <div class="flex items-center p-1.5 rounded-2xl bg-white border border-cream-200 overflow-x-auto no-scrollbar shadow-2xs select-none">
+          <button onclick="window.brainCornerController.setGame('wordsearch')" data-game="wordsearch" class="brain-game-tab flex-1 py-2 px-4 rounded-xl text-xs font-bold transition-all text-center whitespace-nowrap">
+            🔍 Word Search
+          </button>
+          <button onclick="window.brainCornerController.setGame('sudoku')" data-game="sudoku" class="brain-game-tab flex-1 py-2 px-4 rounded-xl text-xs font-bold transition-all text-center whitespace-nowrap">
+            🔢 Sudoku
+          </button>
+          <button onclick="window.brainCornerController.setGame('memory')" data-game="memory" class="brain-game-tab flex-1 py-2 px-4 rounded-xl text-xs font-bold transition-all text-center whitespace-nowrap">
+            🃏 Memory Match
+          </button>
+          <button onclick="window.brainCornerController.setGame('logic')" data-game="logic" class="brain-game-tab flex-1 py-2 px-4 rounded-xl text-xs font-bold transition-all text-center whitespace-nowrap">
+            📚 Logic Puzzle
+          </button>
+        </div>
+
+        <!-- 1. WORD SEARCH -->
+        <div id="game-panel-wordsearch" class="soft-card p-6 rounded-3xl bg-white border border-cream-200">
+          <div class="flex flex-col sm:flex-row items-center justify-between gap-4 mb-5">
+            <div>
+              <div class="flex items-center gap-2">
+                <h3 class="font-bold text-lg text-main">Pencarian Kata Pelajar (+20 SP)</h3>
+                <span id="ws-theme-tag" class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-lavender-100 text-lavender-800 border border-lavender-200">Tema: Fokus & Belajar 📚</span>
+              </div>
+              <p class="text-xs text-muted">Temukan kata-kata inspiratif yang berbeda setiap kali diacak!</p>
+            </div>
+            <button onclick="window.brainCornerController.resetWordSearch()" class="btn-secondary text-xs px-4 py-2 hover:bg-lavender-50">
+              ↻ Acak Kata & Tema Baru
+            </button>
+          </div>
+
+          <div class="flex flex-col md:flex-row items-center gap-8 justify-center">
+            <div id="ws-grid" class="grid grid-cols-9 gap-1 max-w-sm w-full p-2 bg-cream-50 rounded-2xl border border-cream-200"></div>
+            <div class="flex-1 w-full max-w-xs">
+              <h4 class="text-xs font-bold text-main uppercase tracking-wider mb-2">Kata yang Harus Ditemukan:</h4>
+              <div id="ws-word-list" class="flex flex-wrap gap-2"></div>
+              <p class="text-xs text-muted mt-4 bg-lavender-50 p-3 rounded-xl border border-lavender-100">
+                💡 <strong>Cara Main:</strong> Klik huruf-huruf yang menyusun sebuah kata secara berurutan.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. SUDOKU -->
+        <div id="game-panel-sudoku" class="hidden soft-card p-6 rounded-3xl bg-white border border-cream-200">
+          <div class="flex flex-col sm:flex-row items-center justify-between gap-4 mb-4">
+            <div>
+              <h3 class="font-bold text-lg text-main">Classic Sudoku (+25 SP)</h3>
+              <p class="text-xs text-muted">Isi angka 1 sampai 9 pada setiap baris, kolom, dan kotak 3x3.</p>
+            </div>
+            <div class="flex items-center gap-1.5 p-1 rounded-xl bg-slate-100 text-xs">
+              <button onclick="window.brainCornerController.initSudoku('easy'); window.brainCornerController.renderSudoku()" class="px-3 py-1 rounded-lg font-bold bg-white shadow-2xs">Mudah</button>
+              <button onclick="window.brainCornerController.initSudoku('medium'); window.brainCornerController.renderSudoku()" class="px-3 py-1 rounded-lg font-semibold text-slate-600 hover:bg-white">Sedang</button>
+              <button onclick="window.brainCornerController.initSudoku('hard'); window.brainCornerController.renderSudoku()" class="px-3 py-1 rounded-lg font-semibold text-slate-600 hover:bg-white">Sulit</button>
+            </div>
+          </div>
+
+          <div class="flex flex-col md:flex-row items-center justify-center gap-8">
+            <div id="sudoku-grid" class="grid grid-cols-9 gap-0.5 p-2 bg-slate-200 rounded-2xl max-w-md w-full shadow-inner"></div>
+            <div class="w-full max-w-xs space-y-3">
+              <div class="grid grid-cols-3 gap-2">
+                <button onclick="window.brainCornerController.inputSudokuNumber(1)" class="py-3 rounded-xl bg-slate-100 hover:bg-lavender-200 text-slate-800 font-bold text-base transition-colors shadow-2xs">1</button>
+                <button onclick="window.brainCornerController.inputSudokuNumber(2)" class="py-3 rounded-xl bg-slate-100 hover:bg-lavender-200 text-slate-800 font-bold text-base transition-colors shadow-2xs">2</button>
+                <button onclick="window.brainCornerController.inputSudokuNumber(3)" class="py-3 rounded-xl bg-slate-100 hover:bg-lavender-200 text-slate-800 font-bold text-base transition-colors shadow-2xs">3</button>
+                <button onclick="window.brainCornerController.inputSudokuNumber(4)" class="py-3 rounded-xl bg-slate-100 hover:bg-lavender-200 text-slate-800 font-bold text-base transition-colors shadow-2xs">4</button>
+                <button onclick="window.brainCornerController.inputSudokuNumber(5)" class="py-3 rounded-xl bg-slate-100 hover:bg-lavender-200 text-slate-800 font-bold text-base transition-colors shadow-2xs">5</button>
+                <button onclick="window.brainCornerController.inputSudokuNumber(6)" class="py-3 rounded-xl bg-slate-100 hover:bg-lavender-200 text-slate-800 font-bold text-base transition-colors shadow-2xs">6</button>
+                <button onclick="window.brainCornerController.inputSudokuNumber(7)" class="py-3 rounded-xl bg-slate-100 hover:bg-lavender-200 text-slate-800 font-bold text-base transition-colors shadow-2xs">7</button>
+                <button onclick="window.brainCornerController.inputSudokuNumber(8)" class="py-3 rounded-xl bg-slate-100 hover:bg-lavender-200 text-slate-800 font-bold text-base transition-colors shadow-2xs">8</button>
+                <button onclick="window.brainCornerController.inputSudokuNumber(9)" class="py-3 rounded-xl bg-slate-100 hover:bg-lavender-200 text-slate-800 font-bold text-base transition-colors shadow-2xs">9</button>
+              </div>
+              <div class="flex gap-2">
+                <button onclick="window.brainCornerController.inputSudokuNumber(0)" class="flex-1 py-2.5 rounded-xl bg-pink-100 hover:bg-pink-200 text-pink-800 font-bold text-xs transition-colors">
+                  Hapus Angka
+                </button>
+                <button onclick="window.brainCornerController.sudokuHint()" class="flex-1 py-2.5 rounded-xl bg-butter-100 hover:bg-butter-200 text-amber-900 font-bold text-xs transition-colors">
+                  💡 Petunjuk (Hint)
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. MEMORY MATCH -->
+        <div id="game-panel-memory" class="hidden soft-card p-6 rounded-3xl bg-white border border-cream-200">
+          <div class="flex flex-col sm:flex-row items-center justify-between gap-4 mb-4">
+            <div>
+              <h3 class="font-bold text-lg text-main">Memory Match (+15 SP)</h3>
+              <p class="text-xs text-muted">Buka kartu dan cocokkan 8 pasang ikon belajar yang sama.</p>
+            </div>
+            <div class="flex items-center gap-4 text-xs font-bold">
+              <span>Langkah: <strong id="memory-turns-count" class="text-lavender-700">0</strong></span>
+              <span>Cocok: <strong id="memory-pairs-count" class="text-sage-700">0 / 8</strong></span>
+              <button onclick="window.brainCornerController.resetMemory()" class="btn-secondary text-xs px-3 py-1.5">
+                ↻ Mulai Ulang
+              </button>
+            </div>
+          </div>
+          <div id="memory-grid" class="grid grid-cols-4 gap-3 max-w-md mx-auto p-4 bg-cream-50 rounded-2xl border border-cream-200"></div>
+        </div>
+
+        <!-- 4. LOGIC PUZZLE -->
+        <div id="game-panel-logic" class="hidden soft-card p-6 rounded-3xl bg-white border border-cream-200">
+          <div class="flex flex-col sm:flex-row items-center justify-between gap-4 mb-4">
+            <div>
+              <h3 class="font-bold text-lg text-main">Logic Puzzle: Menara Buku Pelajar (+25 SP)</h3>
+              <p class="text-xs text-muted">Pindahkan seluruh tumpukan buku dari Meja A ke Meja C. Aturan: Buku besar tidak boleh ditaruh di atas buku kecil!</p>
+            </div>
+            <div class="flex items-center gap-4 text-xs font-bold">
+              <span>Langkah: <strong id="logic-moves-count" class="text-lavender-700">0</strong></span>
+              <button onclick="window.brainCornerController.resetLogicPuzzle()" class="btn-secondary text-xs px-3 py-1.5">
+                ↻ Reset Posisi
+              </button>
+            </div>
+          </div>
+          <div id="logic-towers-container" class="grid grid-cols-3 gap-4 max-w-2xl mx-auto my-6"></div>
+        </div>
+      </section>
+
+      <!-- ================= 9. VIEW: STUDY TRACKER ================= -->
+      <section id="view-tracker" class="view-container hidden space-y-6 animate-in fade-in duration-300">
+        <div>
+          <h2 class="font-heading text-2xl font-bold text-main">Study Tracker & Analytics 📊</h2>
+          <p class="text-xs sm:text-sm text-muted">Pantau perkembangan belajar, level, streak harian, dan statistik mingguan.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="p-6 rounded-3xl bg-gradient-to-br from-lavender-100 to-white border border-lavender-200 shadow-soft">
+            <span class="text-xs font-bold text-lavender-700 uppercase tracking-wider">Level Pelajar</span>
+            <div class="flex items-center gap-3 mt-1 mb-2">
+              <span id="tracker-level-badge" class="text-3xl">🌱</span>
+              <h3 id="tracker-level-name" class="font-extrabold text-xl text-main">Level 1 • Beginner</h3>
+            </div>
+            <div class="w-full h-2 rounded-full bg-slate-100 overflow-hidden mb-1.5">
+              <div id="tracker-progress-bar" class="h-full rounded-full bg-lavender-600 progress-fill" style="width: 10%"></div>
+            </div>
+            <p id="tracker-progress-text" class="text-xs text-muted">100 SP lagi untuk naik ke Level 2</p>
+          </div>
+
+          <div class="p-6 rounded-3xl bg-gradient-to-br from-butter-100 to-white border border-butter-200 shadow-soft">
+            <span class="text-xs font-bold text-amber-700 uppercase tracking-wider">Study Points (SP)</span>
+            <h3 id="tracker-total-sp" class="font-extrabold text-3xl text-main mt-1 mb-1">0 SP</h3>
+            <p class="text-xs text-muted">Didapatkan dari menyelesaikan tugas, timer, dan target belajar.</p>
+          </div>
+
+          <div class="p-6 rounded-3xl bg-gradient-to-br from-sage-100 to-white border border-sage-200 shadow-soft">
+            <span class="text-xs font-bold text-sage-700 uppercase tracking-wider">Study Streak</span>
+            <div class="flex items-center gap-2 mt-1 mb-1">
+              <h3 id="tracker-streak-days" class="font-extrabold text-3xl text-main">1 Hari</h3>
+              <span class="text-2xl">🔥</span>
+            </div>
+            <p id="tracker-highest-streak" class="text-xs text-muted">Tertinggi: 1 Hari</p>
+          </div>
+        </div>
+
+        <div class="soft-card p-6 rounded-3xl bg-white border border-cream-200">
+          <h3 class="font-heading text-base font-bold text-main mb-4">Statistik Belajar Mingguan</h3>
+          <div class="w-full h-64">
+            <canvas id="tracker-weekly-chart"></canvas>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div class="space-y-3">
+            <h3 class="font-heading text-base font-bold text-main">Tingkatan Level StudySpace</h3>
+            <div id="tracker-tiers-list" class="space-y-2"></div>
+          </div>
+          <div class="space-y-3">
+            <h3 class="font-heading text-base font-bold text-main">Riwayat Aktivitas & Poin</h3>
+            <div id="tracker-activity-history" class="space-y-2 max-h-96 overflow-y-auto pr-1"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= 10. VIEW: MY QUESTS ================= -->
+      <section id="view-quests" class="view-container hidden space-y-6 animate-in fade-in duration-300">
+        <div>
+          <h2 class="font-heading text-2xl font-bold text-main">My Quests ⚔️</h2>
+          <p class="text-xs sm:text-sm text-muted">Selesaikan misi harian dan mingguan untuk meraih bonus Study Points ekstra.</p>
+        </div>
+
+        <div class="flex items-center p-1.5 rounded-2xl bg-white border border-cream-200 max-w-md shadow-2xs select-none">
+          <button onclick="window.questsController.setTab('daily')" data-tab="daily" class="quest-tab-btn flex-1 py-2 px-4 rounded-xl text-xs font-bold transition-all text-center">
+            Misi Harian (Daily)
+          </button>
+          <button onclick="window.questsController.setTab('weekly')" data-tab="weekly" class="quest-tab-btn flex-1 py-2 px-4 rounded-xl text-xs font-bold transition-all text-center">
+            Misi Mingguan
+          </button>
+          <button onclick="window.questsController.setTab('special')" data-tab="special" class="quest-tab-btn flex-1 py-2 px-4 rounded-xl text-xs font-bold transition-all text-center">
+            Misi Spesial
+          </button>
+        </div>
+
+        <div id="quests-list-container" class="space-y-3"></div>
+      </section>
+
+      <!-- ================= 11. VIEW: ACHIEVEMENTS ================= -->
+      <section id="view-achievements" class="view-container hidden space-y-6 animate-in fade-in duration-300">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="font-heading text-2xl font-bold text-main">Achievements & Badges 🏆</h2>
+            <p class="text-xs sm:text-sm text-muted">Buka lencana kehormatan belajar dari pencapaian nyata belajarmu.</p>
+          </div>
+          <span id="achievements-unlocked-count" class="px-3.5 py-1.5 rounded-full bg-lavender-100 text-lavender-800 text-xs font-bold">
+            0 / 10 Terbuka
+          </span>
+        </div>
+
+        <div id="achievements-grid-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"></div>
+      </section>
+
+      <!-- ================= 12. VIEW: MY AVATAR ================= -->
+      <section id="view-avatar" class="view-container hidden space-y-6 animate-in fade-in duration-300">
+        <div>
+          <h2 class="font-heading text-2xl font-bold text-main">My Avatar Creator 🌸</h2>
+          <p class="text-xs sm:text-sm text-muted">Kreasikan avatarmu dengan pilihan karakter perempuan atau laki-laki, rambut/hijab, busana, dan aksesori belajar.</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+          <div class="soft-card p-6 rounded-3xl bg-white border border-cream-200 flex flex-col items-center sticky top-24 shadow-soft">
+            <div id="avatar-page-preview" class="w-48 h-48 rounded-full border-4 border-lavender-200 shadow-md flex items-center justify-center mb-4 bg-cream-50 overflow-hidden"></div>
+            <h3 class="font-bold text-base text-main mb-1">Pratinjau Langsung</h3>
+            <p class="text-xs text-muted mb-4 text-center">Setiap pilihan langsung tampil pada avatarmu.</p>
+            <button onclick="window.app.saveAvatarChanges()" class="btn-primary w-full py-3 shadow-md">
+              Simpan Perubahan Avatar ✨
+            </button>
+          </div>
+
+          <div class="lg:col-span-2 soft-card p-6 sm:p-8 rounded-3xl bg-white border border-cream-200 shadow-soft">
+            <div id="avatar-page-controls"></div>
+            <div class="pt-4 border-t border-cream-100">
+              <button onclick="window.app.saveAvatarChanges()" class="btn-primary w-full py-3 shadow-md">
+                Simpan Perubahan Avatar ✨
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= 13. VIEW: SETTINGS ================= -->
+      <section id="view-settings" class="view-container hidden space-y-6 animate-in fade-in duration-300">
+        <div>
+          <h2 class="font-heading text-2xl font-bold text-main">Settings & Profil ⚙️</h2>
+          <p class="text-xs sm:text-sm text-muted">Atur profil pribadimu, preferensi tema, audio, dan cadangan data.</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div class="lg:col-span-2 soft-card p-6 sm:p-8 rounded-3xl bg-white border border-cream-200">
+            <h3 class="font-heading text-base font-bold text-main mb-4">Profil Pelajar</h3>
+            <form onsubmit="window.settingsController.saveProfile(event)" class="space-y-4">
+              <div>
+                <label class="block text-xs font-bold text-main mb-1">Nama Lengkap / Panggilan</label>
+                <input id="settings-input-name" type="text" required class="w-full px-4 py-2.5 rounded-xl text-sm border border-cream-300 focus:outline-none focus:ring-2 focus:ring-lavender-400">
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-xs font-bold text-main mb-1">Username & Akun Browser</label>
+                  <input id="settings-input-email" type="text" disabled class="w-full px-4 py-2.5 rounded-xl text-sm border border-cream-200 bg-slate-50 text-slate-500 font-medium cursor-not-allowed">
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-main mb-1">Jenjang / Kelas</label>
+                  <input id="settings-input-grade" type="text" placeholder="Contoh: SMA Kelas 11 / Mahasiswa" class="w-full px-4 py-2.5 rounded-xl text-sm border border-cream-300 focus:outline-none focus:ring-2 focus:ring-lavender-400">
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-main mb-1">Motto Belajar</label>
+                <textarea id="settings-input-bio" rows="2" class="w-full px-4 py-2.5 rounded-xl text-sm border border-cream-300 focus:outline-none focus:ring-2 focus:ring-lavender-400"></textarea>
+              </div>
+
+              <button type="submit" class="btn-primary text-xs px-6 py-2.5 shadow-md">
+                Simpan Perubahan Profil
+              </button>
+            </form>
+          </div>
+
+          <div class="space-y-6">
+            <div class="soft-card p-6 rounded-3xl bg-white border border-cream-200 space-y-4">
+              <h3 class="font-heading text-base font-bold text-main">Tema Tampilan & Suara</h3>
+
+              <div>
+                <label class="block text-xs font-bold text-main mb-1">Pilih Tema Visual</label>
+                <select id="settings-theme-select" onchange="window.settingsController.setTheme(this.value)" class="w-full px-3 py-2.5 rounded-xl text-xs border border-cream-300 bg-white font-semibold">
+                  <option value="cream">Soft Cream (Default) 🍦</option>
+                  <option value="lavender">Cozy Lavender 💜</option>
+                  <option value="sage">Sage Garden 🍃</option>
+                  <option value="peach">Sunset Peach 🍑</option>
+                </select>
+              </div>
+
+              <div class="flex items-center justify-between pt-2">
+                <div>
+                  <h4 class="text-xs font-bold text-main">Efek Suara (SFX)</h4>
+                  <p class="text-[10px] text-muted">Lonceng pencapaian & timer</p>
+                </div>
+                <input 
+                  id="settings-sfx-toggle" 
+                  type="checkbox" 
+                  onchange="window.settingsController.toggleSFX(this.checked)" 
+                  class="w-4 h-4 accent-lavender-600 cursor-pointer">
+              </div>
+
+              <div class="pt-3 border-t border-cream-100">
+                <button onclick="window.settingsController.replayTutorial()" class="w-full py-2.5 rounded-xl text-xs font-bold text-lavender-700 bg-lavender-50 hover:bg-lavender-100 transition-colors">
+                  Ulangi Panduan Tutorial 🧭
+                </button>
+              </div>
+            </div>
+
+            <div class="soft-card p-6 rounded-3xl bg-white border border-cream-200 space-y-3">
+              <h3 class="font-heading text-base font-bold text-main">Cadangan Data</h3>
+              <p class="text-xs text-muted">Ekspor atau pulihkan datamu sewaktu-waktu.</p>
+              <div class="flex gap-2">
+                <button onclick="window.settingsController.exportData()" class="btn-secondary text-xs flex-1 py-2">
+                  Ekspor JSON 💾
+                </button>
+                <label class="btn-secondary text-xs flex-1 py-2 text-center cursor-pointer">
+                  Impor JSON 📂
+                  <input type="file" accept=".json" onchange="window.settingsController.importData(event)" class="hidden">
+                </label>
+              </div>
+
+              <button onclick="window.settingsController.resetAllData()" class="w-full text-xs text-pink-600 hover:underline pt-2">
+                Bersihkan Semua Data ke Awal
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ========================================================
+       MOBILE BOTTOM NAVIGATION BAR
+  ======================================================== -->
+  <nav class="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-cream-200 px-3 py-2 flex items-center justify-around shadow-lg">
+    <button onclick="window.app.navigate('dashboard')" data-view="dashboard" class="mobile-nav-btn flex flex-col items-center gap-1 text-slate-400">
+      <span class="text-lg">🏠</span>
+      <span class="text-[10px]">Dashboard</span>
+    </button>
+    <button onclick="window.app.navigate('tasks')" data-view="tasks" class="mobile-nav-btn flex flex-col items-center gap-1 text-slate-400">
+      <span class="text-lg">📝</span>
+      <span class="text-[10px]">Tasks</span>
+    </button>
+    <button onclick="window.app.navigate('timer')" data-view="timer" class="mobile-nav-btn flex flex-col items-center gap-1 text-slate-400">
+      <span class="text-lg">⏳</span>
+      <span class="text-[10px]">Timer</span>
+    </button>
+    <button onclick="window.app.navigate('music')" data-view="music" class="mobile-nav-btn flex flex-col items-center gap-1 text-slate-400">
+      <span class="text-lg">🎧</span>
+      <span class="text-[10px]">Music</span>
+    </button>
+    <button onclick="window.app.toggleMobileDrawer()" class="mobile-nav-btn flex flex-col items-center gap-1 text-slate-400">
+      <span class="text-lg">☰</span>
+      <span class="text-[10px]">Menu</span>
+    </button>
+  </nav>
+
+  <!-- ========================================================
+       MOBILE SLIDE-OVER DRAWER
+  ======================================================== -->
+  <div id="mobile-drawer-backdrop" class="hidden fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50"></div>
+  <aside id="mobile-drawer" class="fixed top-0 bottom-0 left-0 w-72 bg-white z-50 transform -translate-x-full transition-transform duration-300 ease-in-out flex flex-col shadow-2xl">
+    <div class="p-5 border-b border-cream-200 flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <span class="text-xl">✨</span>
+        <h2 class="font-heading font-bold text-lg text-main">StudySpace</h2>
+      </div>
+      <button onclick="window.app.closeMobileDrawer()" class="p-1.5 rounded-lg text-slate-400 hover:text-main">✕</button>
+    </div>
+
+    <nav class="flex-1 p-4 space-y-1 overflow-y-auto">
+      <button onclick="window.app.navigate('dashboard')" class="w-full text-left px-3 py-2 rounded-xl text-sm font-semibold hover:bg-slate-50 flex items-center gap-3">🏠 Dashboard</button>
+      <button onclick="window.app.navigate('tasks')" class="w-full text-left px-3 py-2 rounded-xl text-sm font-semibold hover:bg-slate-50 flex items-center gap-3">📝 My Tasks</button>
+      <button onclick="window.app.navigate('schedule')" class="w-full text-left px-3 py-2 rounded-xl text-sm font-semibold hover:bg-slate-50 flex items-center gap-3">📅 My Schedule</button>
+      <button onclick="window.app.navigate('notes')" class="w-full text-left px-3 py-2 rounded-xl text-sm font-semibold hover:bg-slate-50 flex items-center gap-3">📓 My Notes</button>
+      <button onclick="window.app.navigate('goals')" class="w-full text-left px-3 py-2 rounded-xl text-sm font-semibold hover:bg-slate-50 flex items-center gap-3">🎯 My Goals</button>
+      <button onclick="window.app.navigate('timer')" class="w-full text-left px-3 py-2 rounded-xl text-sm font-semibold hover:bg-slate-50 flex items-center gap-3">⏳ Focus Timer</button>
+      <button onclick="window.app.navigate('music')" class="w-full text-left px-3 py-2 rounded-xl text-sm font-semibold hover:bg-slate-50 flex items-center gap-3">🎧 Study Music</button>
+      <button onclick="window.app.navigate('brain')" class="w-full text-left px-3 py-2 rounded-xl text-sm font-semibold hover:bg-slate-50 flex items-center gap-3">🧩 Brain Corner</button>
+      <button onclick="window.app.navigate('tracker')" class="w-full text-left px-3 py-2 rounded-xl text-sm font-semibold hover:bg-slate-50 flex items-center gap-3">📊 Study Tracker</button>
+      <button onclick="window.app.navigate('quests')" class="w-full text-left px-3 py-2 rounded-xl text-sm font-semibold hover:bg-slate-50 flex items-center gap-3">⚔️ My Quests</button>
+      <button onclick="window.app.navigate('achievements')" class="w-full text-left px-3 py-2 rounded-xl text-sm font-semibold hover:bg-slate-50 flex items-center gap-3">🏆 Achievements</button>
+      <button onclick="window.app.navigate('avatar')" class="w-full text-left px-3 py-2 rounded-xl text-sm font-semibold hover:bg-slate-50 flex items-center gap-3">🌸 My Avatar</button>
+      <button onclick="window.app.navigate('settings')" class="w-full text-left px-3 py-2 rounded-xl text-sm font-semibold hover:bg-slate-50 flex items-center gap-3">⚙️ Settings</button>
+    </nav>
+
+    <div class="p-4 border-t border-cream-200">
+      <button onclick="window.authController.logout()" class="w-full py-2.5 rounded-xl text-xs font-bold text-pink-700 bg-pink-50">
+        🚪 Keluar (Logout)
+      </button>
+    </div>
+  </aside>
+
+  <!-- ========================================================
+       MODALS
+  ======================================================== -->
+
+  <!-- 1. AUTH MODAL (Allows REAL email registration & login) -->
+  <div id="auth-modal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border border-cream-200 animate-in fade-in zoom-in duration-200">
+      <div class="text-center mb-6">
+        <span class="text-4xl mb-2 inline-block">✨</span>
+        <h3 class="font-heading text-2xl font-bold text-main">StudySpace</h3>
+        <p class="text-xs text-muted">Ruang Belajar & Produktivitas Pribadimu</p>
+      </div>
+
+      <!-- Auth Tabs -->
+      <div class="flex p-1 rounded-2xl bg-cream-100 mb-6 select-none">
+        <button id="auth-tab-login" onclick="window.app.switchAuthTab('login')" class="w-1/2 py-2 rounded-xl text-xs font-bold bg-white text-main shadow-xs">
+          Masuk (Login)
+        </button>
+        <button id="auth-tab-register" onclick="window.app.switchAuthTab('register')" class="w-1/2 py-2 rounded-xl text-xs font-semibold text-muted hover:text-main">
+          Daftar Akun Baru
+        </button>
+      </div>
+
+      <!-- Login Form (Username & password only) -->
+      <form id="auth-form-login" onsubmit="event.preventDefault(); window.authController.login(document.getElementById('login-username').value, document.getElementById('login-pass').value)" class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-main mb-1">Username Akun</label>
+          <input id="login-username" type="text" placeholder="Masukkan username terdaftarmu" required class="w-full px-4 py-2.5 rounded-xl text-sm border border-cream-300 focus:outline-none focus:ring-2 focus:ring-lavender-400">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-main mb-1">Password</label>
+          <input id="login-pass" type="password" placeholder="Masukkan passwordmu" required class="w-full px-4 py-2.5 rounded-xl text-sm border border-cream-300 focus:outline-none focus:ring-2 focus:ring-lavender-400">
+        </div>
+        <div class="p-2.5 rounded-xl bg-lavender-50/70 border border-lavender-100 flex items-center gap-2 text-[11px] text-lavender-800">
+          <span>🔒</span>
+          <span>Data tersimpan otomatis & tertaut aman ke akun browser Chrome ini.</span>
+        </div>
+        <button type="submit" class="btn-primary w-full py-3 shadow-md">
+          Masuk ke StudySpace ✨
+        </button>
+        <div class="pt-2 text-center">
+          <button type="button" onclick="window.app.loginAsGuest()" class="text-xs text-lavender-700 font-semibold hover:underline">
+            ⚡ Masuk Cepat sebagai Siswa Demo
+          </button>
+        </div>
+      </form>
+
+      <!-- Register Form (Username, Kelas, Motto [manual / auto], Password) -->
+      <form id="auth-form-register" onsubmit="event.preventDefault(); window.authController.register(document.getElementById('reg-username').value, document.getElementById('reg-kelas').value, document.getElementById('reg-motto').value, document.getElementById('reg-pass').value)" class="hidden space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-main mb-1">Username (ID Unik) *</label>
+          <input id="reg-username" type="text" placeholder="contoh: sarah_amalia" required class="w-full px-4 py-2.5 rounded-xl text-sm border border-cream-300 focus:outline-none focus:ring-2 focus:ring-lavender-400">
+          <p class="text-[10px] text-muted mt-0.5">Jika akun sudah terdaftar, tidak bisa daftar lagi dengan username yang sama.</p>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-main mb-1">Kelas / Jenjang Pendidikan *</label>
+          <input id="reg-kelas" type="text" placeholder="Contoh: 11 IPA 2 / SMA Kelas 11 / Mahasiswa" required class="w-full px-4 py-2.5 rounded-xl text-sm border border-cream-300 focus:outline-none focus:ring-2 focus:ring-lavender-400">
+        </div>
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <label class="block text-xs font-bold text-main">Motto Belajar</label>
+            <button type="button" onclick="window.authController.randomizeMottoInput()" class="text-[11px] font-bold text-lavender-700 hover:text-lavender-900 bg-lavender-100 px-2 py-0.5 rounded-lg hover:underline transition-all">
+              🎲 Acak Motto
+            </button>
+          </div>
+          <input id="reg-motto" type="text" placeholder="Tulis motomu atau klik '🎲 Acak Motto'..." class="w-full px-4 py-2.5 rounded-xl text-sm border border-cream-300 focus:outline-none focus:ring-2 focus:ring-lavender-400">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-main mb-1">Buat Password *</label>
+          <input id="reg-pass" type="password" placeholder="Minimal 4 karakter" required class="w-full px-4 py-2.5 rounded-xl text-sm border border-cream-300 focus:outline-none focus:ring-2 focus:ring-lavender-400">
+        </div>
+        <div class="p-2.5 rounded-xl bg-sage-50 border border-sage-200/70 flex items-center gap-2 text-[11px] text-sage-800">
+          <span>🌐</span>
+          <span>Akun langsung tertaut otomatis ke akun browser Chrome & tersimpan aman.</span>
+        </div>
+        <button type="submit" class="btn-primary w-full py-3 shadow-md">
+          Daftar Akun Baru & Buat Avatar 🌸
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 2. AVATAR CREATOR MODAL -->
+  <div id="avatar-modal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-2xl w-full shadow-2xl border border-cream-200 max-h-[90vh] flex flex-col animate-in fade-in zoom-in duration-200">
+      <div class="flex items-center justify-between pb-4 border-b border-cream-200 shrink-0">
+        <div>
+          <h3 class="font-heading text-xl font-bold text-main">Desain Karakter Avatarmu 🌸</h3>
+          <p class="text-xs text-muted">Pilih karakter perempuan atau laki-laki dan sesuaikan penampilanmu.</p>
+        </div>
+        <button onclick="window.app.closeAvatarModal()" class="text-slate-400 hover:text-slate-600">✕</button>
+      </div>
+
+      <div class="flex-1 overflow-y-auto py-4 flex flex-col sm:flex-row gap-6">
+        <div class="sm:w-48 shrink-0 flex flex-col items-center justify-center bg-cream-50 rounded-2xl p-4 border border-cream-200">
+          <div id="avatar-modal-preview" class="w-36 h-36 rounded-full border-2 border-lavender-300 shadow-sm flex items-center justify-center bg-white overflow-hidden mb-2"></div>
+          <span class="text-[11px] font-bold text-slate-600">Pratinjau Avatar</span>
+        </div>
+        <div id="avatar-modal-controls" class="flex-1 overflow-y-auto pr-1"></div>
+      </div>
+
+      <div class="pt-4 border-t border-cream-200 flex justify-end gap-3 shrink-0">
+        <button onclick="window.app.closeAvatarModal()" class="btn-secondary text-xs">
+          Nanti Saja
+        </button>
+        <button onclick="window.app.saveAvatarChanges()" class="btn-primary text-xs shadow-md">
+          Simpan Avatar ✨
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. TASK MODAL -->
+  <div id="task-modal" class="hidden fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl p-6 sm:p-7 max-w-lg w-full shadow-2xl border border-cream-200">
+      <h3 id="task-modal-title" class="font-heading text-lg font-bold text-main mb-4">Tambah Tugas Baru</h3>
+      <form id="task-form" onsubmit="window.tasksController.saveTaskFromForm(event)" class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-main mb-1">Judul Tugas *</label>
+          <input id="task-input-title" type="text" required placeholder="Contoh: Latihan Soal Biologi" class="w-full px-4 py-2.5 rounded-xl text-sm border border-cream-300 focus:outline-none focus:ring-2 focus:ring-lavender-400">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-main mb-1">Deskripsi / Detail</label>
+          <textarea id="task-input-desc" rows="2" placeholder="Detail materi atau instruksi tugas..." class="w-full px-4 py-2 rounded-xl text-xs border border-cream-300 focus:outline-none focus:ring-2 focus:ring-lavender-400"></textarea>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-main mb-1">Deadline *</label>
+            <input id="task-input-deadline" type="date" required class="w-full px-3 py-2 rounded-xl text-xs border border-cream-300">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-main mb-1">Prioritas</label>
+            <select id="task-input-priority" class="w-full px-3 py-2 rounded-xl text-xs border border-cream-300">
+              <option value="low">Rendah (Low)</option>
+              <option value="medium" selected>Sedang (Medium)</option>
+              <option value="high">Tinggi (High)</option>
+            </select>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-main mb-1">Kategori / Mapel</label>
+            <input id="task-input-category" type="text" placeholder="Contoh: Math, Bahasa" class="w-full px-3 py-2 rounded-xl text-xs border border-cream-300">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-main mb-1">Status</label>
+            <select id="task-input-status" class="w-full px-3 py-2 rounded-xl text-xs border border-cream-300">
+              <option value="todo">To Do</option>
+              <option value="inprogress">Sedang Dikerjakan</option>
+              <option value="done">Selesai (Done)</option>
+            </select>
+          </div>
+        </div>
+        <div class="flex justify-end gap-2 pt-3 border-t border-cream-100">
+          <button type="button" onclick="window.tasksController.closeModal()" class="btn-secondary text-xs">Batal</button>
+          <button type="submit" class="btn-primary text-xs shadow-md">Simpan Tugas (+20 SP)</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 4. SCHEDULE MODAL -->
+  <div id="schedule-modal" class="hidden fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl p-6 sm:p-7 max-w-lg w-full shadow-2xl border border-cream-200">
+      <h3 id="schedule-modal-title" class="font-heading text-lg font-bold text-main mb-4">Tambah Jadwal Kegiatan</h3>
+      <form id="schedule-form" onsubmit="window.scheduleController.saveScheduleFromForm(event)" class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-main mb-1">Nama Kegiatan *</label>
+          <input id="sch-input-title" type="text" required placeholder="Contoh: Belajar Mandiri Fisika" class="w-full px-4 py-2.5 rounded-xl text-sm border border-cream-300">
+        </div>
+        <div class="grid grid-cols-3 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-main mb-1">Hari</label>
+            <select id="sch-input-day" class="w-full px-3 py-2 rounded-xl text-xs border border-cream-300">
+              <option value="Setiap Hari">Setiap Hari</option>
+              <option value="Senin">Senin</option>
+              <option value="Selasa">Selasa</option>
+              <option value="Rabu">Rabu</option>
+              <option value="Kamis">Kamis</option>
+              <option value="Jumat">Jumat</option>
+              <option value="Sabtu">Sabtu</option>
+              <option value="Minggu">Minggu</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-main mb-1">Jam Mulai *</label>
+            <input id="sch-input-start" type="time" required value="08:00" class="w-full px-3 py-2 rounded-xl text-xs border border-cream-300">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-main mb-1">Jam Selesai *</label>
+            <input id="sch-input-end" type="time" required value="09:30" class="w-full px-3 py-2 rounded-xl text-xs border border-cream-300">
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-main mb-1">Kategori</label>
+            <input id="sch-input-category" type="text" placeholder="Study, Homework, Break" class="w-full px-3 py-2 rounded-xl text-xs border border-cream-300">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-main mb-1">Lokasi</label>
+            <input id="sch-input-location" type="text" placeholder="Ruang Belajar / Meja Belajar" class="w-full px-3 py-2 rounded-xl text-xs border border-cream-300">
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-main mb-1">Catatan</label>
+          <input id="sch-input-notes" type="text" placeholder="Contoh: Siapkan catatan bab 2" class="w-full px-3 py-2 rounded-xl text-xs border border-cream-300">
+        </div>
+        <div class="flex justify-end gap-2 pt-3 border-t border-cream-100">
+          <button type="button" onclick="window.scheduleController.closeModal()" class="btn-secondary text-xs">Batal</button>
+          <button type="submit" class="btn-sage text-xs shadow-md">Simpan Jadwal</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 5. GOAL MODAL -->
+  <div id="goal-modal" class="hidden fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl p-6 sm:p-7 max-w-md w-full shadow-2xl border border-cream-200">
+      <h3 class="font-heading text-lg font-bold text-main mb-4">Tambah Target Belajar 🎯</h3>
+      <form id="goal-form" onsubmit="window.goalsController.saveGoalFromForm(event)" class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-main mb-1">Judul Target *</label>
+          <input id="goal-input-title" type="text" required placeholder="Contoh: Membaca 30 Halaman" class="w-full px-4 py-2.5 rounded-xl text-sm border border-cream-300">
+        </div>
+        <div class="grid grid-cols-3 gap-2">
+          <div>
+            <label class="block text-xs font-bold text-main mb-1">Tipe</label>
+            <select id="goal-input-type" class="w-full px-2 py-2 rounded-xl text-xs border border-cream-300">
+              <option value="daily">Harian (+30 SP)</option>
+              <option value="weekly">Mingguan (+50 SP)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-main mb-1">Jumlah</label>
+            <input id="goal-input-target" type="number" min="1" value="30" required class="w-full px-2 py-2 rounded-xl text-xs border border-cream-300">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-main mb-1">Satuan</label>
+            <input id="goal-input-unit" type="text" value="halaman" required class="w-full px-2 py-2 rounded-xl text-xs border border-cream-300">
+          </div>
+        </div>
+        <div class="flex justify-end gap-2 pt-3 border-t border-cream-100">
+          <button type="button" onclick="window.goalsController.closeModal()" class="btn-secondary text-xs">Batal</button>
+          <button type="submit" class="btn-primary text-xs shadow-md">Simpan Target</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 6. NOTE EDITOR MODAL -->
+  <div id="note-editor-modal" class="hidden fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl p-6 sm:p-7 max-w-2xl w-full shadow-2xl border border-cream-200 max-h-[85vh] flex flex-col">
+      <div class="flex items-center justify-between pb-3 border-b border-cream-200 shrink-0">
+        <input id="note-edit-title" type="text" placeholder="Judul Catatan..." oninput="window.notesController.onInputContent()" class="font-heading text-lg font-bold text-main w-full focus:outline-none">
+        <button onclick="window.notesController.closeEditor()" class="text-slate-400 hover:text-slate-600 ml-3">✕</button>
+      </div>
+
+      <div class="py-3 flex items-center gap-3 shrink-0">
+        <input id="note-edit-category" type="text" placeholder="Kategori/Mapel" oninput="window.notesController.onInputContent()" class="px-3 py-1 text-xs rounded-lg border border-cream-200">
+        <select id="note-edit-color" onchange="window.notesController.onInputContent()" class="px-2 py-1 text-xs rounded-lg border border-cream-200">
+          <option value="lavender">Warna Lavender</option>
+          <option value="sage">Warna Sage Green</option>
+          <option value="pink">Warna Soft Pink</option>
+          <option value="butter">Warna Butter Yellow</option>
+        </select>
+        <span id="note-save-status" class="text-[11px] text-muted italic ml-auto">Semua perubahan tersimpan</span>
+      </div>
+
+      <textarea id="note-edit-content" rows="12" placeholder="Tulis catatan, rangkuman, atau rumus di sini..." oninput="window.notesController.onInputContent()" class="flex-1 w-full p-3 rounded-2xl bg-cream-50 border border-cream-200 text-sm leading-relaxed focus:outline-none resize-none"></textarea>
+
+      <div class="pt-3 flex justify-end shrink-0">
+        <button onclick="window.notesController.closeEditor()" class="btn-primary text-xs px-6 py-2">
+          Selesai & Tutup
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 7. TIMER COMPLETE CELEBRATION MODAL -->
+  <div id="timer-complete-modal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl p-7 max-w-sm w-full text-center shadow-2xl border border-cream-200 animate-in fade-in zoom-in duration-200">
+      <div class="w-16 h-16 rounded-full bg-amber-100 flex items-center justify-center text-3xl mx-auto mb-3">
+        🎉
+      </div>
+      <h3 class="font-heading text-xl font-bold text-main mb-1">Sesi Fokus Selesai!</h3>
+      <p class="text-xs text-muted mb-3">Bagus sekali! Kamu telah menyelesaikan sesi belajarmu dengan penuh konsentrasi.</p>
+      <div id="timer-complete-sp" class="text-2xl font-black text-amber-700 bg-amber-50 py-2 rounded-2xl border border-amber-200 mb-5">
+        +10 SP
+      </div>
+      <div class="flex flex-col gap-2">
+        <button onclick="window.timerController.startBreak(5)" class="btn-sage w-full py-2.5 text-xs">
+          Istirahat 5 Menit 🍵
+        </button>
+        <button onclick="document.getElementById('timer-complete-modal').classList.add('hidden')" class="btn-primary w-full py-2.5 text-xs">
+          Mulai Sesi Baru ✨
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 8. FOCUS MODE EXIT CONFIRMATION DIALOG ('E' KEY) -->
+  <div id="focus-exit-modal" class="hidden fixed inset-0 z-[10000] bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl p-6 max-w-sm w-full text-center shadow-2xl border border-cream-300 animate-in fade-in zoom-in duration-150">
+      <span class="text-3xl mb-2 inline-block">⏳</span>
+      <h4 class="font-heading text-lg font-bold text-main mb-2">Are you sure you want to exit Focus Mode?</h4>
+      <p class="text-xs text-muted mb-5 leading-relaxed">Sesi belajarmu masih dapat dilanjutkan atau kamu bisa keluar dari tampilan layar penuh.</p>
+      <div class="flex items-center justify-center gap-3">
+        <button onclick="window.timerController.cancelExitFocusMode()" class="btn-secondary text-xs px-5 py-2.5">
+          Cancel (Tetap Belajar)
+        </button>
+        <button onclick="window.timerController.confirmExitFocusMode()" class="btn-primary text-xs px-5 py-2.5 bg-pink-600 hover:bg-pink-700">
+          Yes, Exit
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 9. LEVEL UP MODAL -->
+  <div id="level-up-modal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl p-8 max-w-sm w-full text-center shadow-2xl border border-amber-200 animate-in fade-in zoom-in duration-200">
+      <div class="w-20 h-20 rounded-3xl bg-amber-100 flex items-center justify-center text-4xl mx-auto mb-3 shadow-md">
+        👑
+      </div>
+      <span class="text-xs font-bold text-amber-700 uppercase tracking-widest">Selamat! Naik Level</span>
+      <h3 id="modal-level-text" class="font-heading text-2xl font-black text-main mt-1 mb-2">Level 2 • Learner</h3>
+      <p class="text-xs text-muted mb-5 leading-relaxed">Kamu membuka item avatar baru dan semakin dekat menuju Master!</p>
+      <button onclick="window.app.closeLevelUpModal()" class="btn-primary w-full py-3 shadow-md">
+        Terima Kasih! ✨
+      </button>
+    </div>
+  </div>
+
+  <!-- SCRIPTS -->
+  <script src="js/audio.js"></script>
+  <script src="js/avatar.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/dashboard.js"></script>
+  <script src="js/tasks.js"></script>
+  <script src="js/schedule.js"></script>
+  <script src="js/notes.js"></script>
+  <script src="js/goals.js"></script>
+  <script src="js/timer.js"></script>
+  <script src="js/music.js"></script>
+  <script src="js/brain.js"></script>
+  <script src="js/tracker.js"></script>
+  <script src="js/quests.js"></script>
+  <script src="js/achievements.js"></script>
+  <script src="js/settings.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
